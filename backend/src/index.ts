@@ -4,6 +4,7 @@ import { jwtMiddleware, rateLimiter, optionalJwtMiddleware, misybotAuth } from '
 import { circleController } from './controllers/circle.controller';
 import { azureController } from './controllers/azure.controller';
 import { devopsController } from './controllers/devops.controller';
+import { handleCircleWebhook } from './controllers/webhook.controller';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -116,6 +117,19 @@ app.post('/api/payments/subscriptions/:id/cancel', jwtMiddleware, circleControll
 
 // Webhook handler for Circle (no auth - signed by Circle)
 app.post('/api/payments/webhook', circleController.verifyPayment);
+
+// Circle Webhook Handler (CRITICAL - Payment settlement notifications)
+app.post('/api/webhooks/circle', handleCircleWebhook);
+
+// Webhook health check (for debugging)
+app.get('/api/webhooks/circle/health', (req: Request, res: Response) => {
+  res.json({ 
+ status: 'ok', 
+ endpoint: '/api/webhooks/circle',
+ verified: !!process.env.CIRCLE_WEBHOOK_SECRET,
+ timestamp: new Date().toISOString()
+  });
+});
 
 // ==================== AZURE INFRASTRUCTURE ROUTES ====================
 
