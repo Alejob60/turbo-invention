@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import { jwtMiddleware, rateLimiter, optionalJwtMiddleware, misybotAuth } from './auth/jwt-middleware';
+import { jwtMiddleware, rateLimiter, optionalJwtMiddleware, misybotAuth, AuthenticatedRequest } from './auth/jwt-middleware';
 import { circleController } from './controllers/circle.controller';
 import { azureController } from './controllers/azure.controller';
 import { devopsController } from './controllers/devops.controller';
@@ -77,7 +77,7 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
 });
 
 // Refresh token
-app.post('/api/auth/refresh', jwtMiddleware, async (req: Request, res: Response) => {
+app.post('/api/auth/refresh', jwtMiddleware, async (req: AuthenticatedRequest, res: Response) => {
   try {
     // Generate new token with same user data
    const newToken = await misybotAuth.refreshToken(req.user!.id);
