@@ -1,0 +1,42 @@
+{
+  "name": "twin-ai-infra-backend",
+  "version": "1.0.0",
+  "description": "Twin AI Infrastructure- Circle Payments + Azure Automation",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+   "test:integration": "node test-integration.js"
+  },
+  "keywords": [
+    "circle",
+    "azure",
+    "infrastructure",
+    "payments",
+    "x402"
+  ],
+  "author": "Colombia TI",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@azure/arm-compute": "^23.3.0",
+    "@azure/arm-network": "^36.0.0",
+    "@azure/identity": "^4.13.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.4.0",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "ethers": "^6.16.0",
+    "express": "^5.2.1",
+    "ioredis": "^5.10.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

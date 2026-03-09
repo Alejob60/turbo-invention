@@ -1,0 +1,33 @@
+{
+  "name": "twin-ai-infra-frontend",
+  "version": "1.0.0",
+  "description": "Twin AI Infrastructure - ColombiaTI Landing Page",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "keywords": [
+    "nextjs",
+    "react",
+    "colombia-ti",
+    "twin-ai"
+  ],
+  "author": "Colombia TI",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^25.4.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "axios": "^1.13.6",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.1.6",
+    "framer-motion": "^12.35.2",
+    "next": "^14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
+  }
+}
