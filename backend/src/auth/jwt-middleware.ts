@@ -48,7 +48,7 @@ export const jwtMiddleware = async (
   const cachedUser= await redis.get(`user:${token}`);
     if (cachedUser) {
   req.user= JSON.parse(cachedUser);
-  console.log('⚡ User from Redis cache:', req.user.email);
+  console.log('⚡ User from Redis cache:', req.user?.email || 'unknown');
   return next();
     }
 
@@ -138,12 +138,12 @@ export const optionalJwtMiddleware = async (
 /**
  * Rate Limiter con Redis (100 req/min como Discovery API)
  */
-export const rateLimiter = async (
+export const rateLimiter= async (
  req: AuthenticatedRequest,
  res: Response,
-  next: NextFunction
-) => {
-  try {
+ next: NextFunction
+): Promise<void> => {
+ try {
   const userId = req.user?.id || req.ip || 'anonymous';
   const key = `ratelimit:${userId}:${Date.now() - (Date.now() % 60000)}`; // Window de 1 minuto
 
@@ -161,19 +161,20 @@ export const rateLimiter = async (
  res.set('X-RateLimit-Reset', new Date(Date.now() + 60000).toISOString());
 
     if (current > 100) {
-  console.warn(`⚠️ Rate limit exceeded for ${userId}`);
-  return res.status(429).json({
-     error: 'Too Many Requests',
-        message: 'Límite de 100 requests por minuto excedido',
-       retryAfter: 60
+    console.warn(`⚠️ Rate limit exceeded for ${userId}`);
+    res.status(429).json({
+       error: 'Too Many Requests',
+       message: 'Límite de 100 requests por minuto excedido',
+      retryAfter: 60
       });
+    return;
     }
 
     next();
   } catch (error) {
-  console.error('Rate limiter error:', error);
+ console.error('Rate limiter error:', error);
     // No fallar - continuar sin rate limiting
-    next();
+   next();
   }
 };
 
