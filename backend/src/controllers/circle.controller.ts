@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { ObjectId } from 'mongodb';
 import { circleGateway } from '../payments/circle-gateway';
 import { db } from '../database/models';
 
@@ -12,47 +13,49 @@ export const circleController= {
    * Initiate a payment for resource subscription
    * POST /api/payments/initiate
    */
-  initiatePayment: async (req: Request, res: Response) => {
-   try {
-     const { userId, amount, resource, subscriptionType } = req.body;
+  initiatePayment: async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { userId, amount, resource, subscriptionType } = req.body;
 
       // Validate input
-      if (!userId || !amount || !resource) {
-        return res.status(400).json({ error: 'Missing required fields' });
+     if (!userId || !amount || !resource) {
+       return res.status(400).json({ error: 'Missing required fields' });
       }
 
       // Generate payment details for signature
-     const nonce = Date.now();
-     const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+    const nonce = Date.now();
+    const deadline = Math.floor(Date.now() / 1000) + 3600; // 1 hour
+    const transactionId = `tx_${nonce}`;
 
-     const paymentDetails = {
+    const paymentDetails = {
         amount,
-        resource,
+       resource,
         subscriptionType: subscriptionType || 'one-time',
         nonce,
-        deadline,
-        recipient: process.env.CIRCLE_RECIPIENT_ADDRESS!
+       deadline,
+       recipient: process.env.CIRCLE_RECIPIENT_ADDRESS!
       };
 
       // Store pending payment in DB
-      await db.payments.insertOne({
+     await db.payments.insertOne({
+      transactionId,
         userId,
         amount,
-        resource,
+       resource,
         subscriptionType,
-        status: 'pending',
+       status: 'pending',
         nonce,
         createdAt: new Date()
       });
 
-      res.json({
+     res.json({
         success: true,
-       paymentDetails,
-       message: 'Please sign the payment with your wallet'
+      paymentDetails,
+      message: 'Please sign the payment with your wallet'
       });
     } catch (error) {
-     console.error('Initiate payment error:', error);
-      res.status(500).json({ error: 'Failed to initiate payment' });
+    console.error('Initiate payment error:', error);
+     res.status(500).json({ error: 'Failed to initiate payment' });
     }
   },
 
@@ -60,7 +63,7 @@ export const circleController= {
    * Verify payment signature and complete transaction
    * POST /api/payments/verify
    */
-  verifyPayment: async (req: Request, res: Response) => {
+  verifyPayment: async (req: Request, res: Response): Promise<any> => {
    try {
      const { signature, paymentDetails } = req.body;
 
@@ -116,7 +119,7 @@ export const circleController= {
    * Get payment certificate
    * GET /api/payments/certificate/:id
    */
-  getCertificate: async (req: Request, res: Response) => {
+  getCertificate: async (req: Request, res: Response): Promise<any> => {
    try {
      const { id } = req.params;
 
@@ -205,18 +208,21 @@ export const circleController= {
    * Cancel subscription
    * POST /api/payments/subscriptions/:id/cancel
    */
-  cancelSubscription: async (req: Request, res: Response) => {
-   try {
-     const { id } = req.params;
+  cancelSubscription: async (req: Request, res: Response): Promise<any> => {
+  try {
+   const { id} = req.params;
+
+      // Convert string id to ObjectId
+   const objectId = new ObjectId(id);
 
       // Mark subscription as cancelled
-      await db.payments.updateOne(
-        { _id: id },
-        { $set: { status: 'cancelled', cancelledAt: new Date() } }
+    await db.payments.updateOne(
+       { _id: objectId },
+       { $set: { status: 'cancelled', cancelledAt: new Date() } }
       );
 
       // Deactivate certificate
-     const payment = await db.payments.findOne({ _id: id });
+   const payment = await db.payments.findOne({ _id: objectId });
       if (payment) {
         await db.paymentCertificates.updateMany(
           { userId: payment.userId, resource: payment.resource },

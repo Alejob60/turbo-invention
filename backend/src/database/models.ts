@@ -12,17 +12,18 @@ export interface User {
 }
 
 export interface Payment {
-  _id?: ObjectId;
-  transactionId: string;
-  userId: string;
-  amount: string;
+ _id?: ObjectId;
+ transactionId: string;
+ userId: string;
+ amount: string;
  resource: string;
-  status: 'pending' | 'certified' | 'settled' | 'failed';
-  certificateId?: string;
-  signature?: string;
-  nonce?: number;
-  createdAt: Date;
-  settledAt?: Date;
+ subscriptionType?: 'one-time' | 'subscription';
+ status: 'pending' | 'certified' | 'completed' | 'settled' | 'failed' | 'cancelled';
+ certificateId?: string;
+ signature?: string;
+ nonce?: number;
+ createdAt: Date;
+ settledAt?: Date;
 }
 
 export interface PaymentCertificate {
