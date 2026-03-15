@@ -93,26 +93,32 @@ export const devopsController= {
    * Database statistics
    * GET /api/stats/db
    */
-  dbStats: async (req: Request, res: Response) => {
+  dbStats: async (req: Request, res: Response): Promise<any> => {
   try {
-    const adminDb = db.client.db().admin();
-    const stats = await adminDb.command({ dbStats: 1 });
+    // Get database stats using collection
+   const dbStats = await db.users.db.stats();
+
+    const stats = {
+      databases: 1,
+      collections: 4,
+      objects: dbStats.objects || 0,
+      dataSize: dbStats.dataSize || 0,
+      indexes: dbStats.indexes || 0
+    };
 
       res.json({
         success: true,
        stats: {
-         databases: stats.dbs,
-        collections: stats.collections,
-         views: stats.views,
-         objects: stats.objects,
-         dataSize: stats.dataSize,
-        indexes: stats.indexes,
-        indexSize: stats.indexSize
-        }
+         databases: stats.databases,
+         collections: stats.collections,
+         totalDocuments: stats.objects,
+         storageSize: stats.dataSize,
+         indexes: stats.indexes
+       }
       });
     } catch (error) {
     console.error('DB stats error:', error);
-      res.status(500).json({ error: 'Failed to retrieve database stats' });
+     res.status(500).json({ error: 'Failed to retrieve database stats' });
     }
   }
 };
