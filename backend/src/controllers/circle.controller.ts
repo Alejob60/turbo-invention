@@ -170,10 +170,10 @@ export const circleController= {
   },
 
   /**
-   * Get active subscriptions for user
+   * Get user subscriptions
    * GET /api/payments/subscriptions/:userId
    */
-  getSubscriptions: async (req: Request, res: Response) => {
+  getSubscriptions: async (req: Request, res: Response): Promise<any> => {
    try {
      const { userId } = req.params;
 
@@ -184,13 +184,14 @@ export const circleController= {
       }).sort({ createdAt: -1 }).toArray();
 
       // Filter only active (non-expired) subscriptions
-     const active = subscriptions.filter(sub => {
-       const certificate = db.paymentCertificates.findOne({ 
-          userId: sub.userId,
-          resource: sub.resource 
-        });
-        return certificate && certificate.status === 'active';
+   const active = await Promise.all(subscriptions.map(async sub => {
+     const certificate = await db.paymentCertificates.findOne({ 
+        userId: sub.userId,
+       resource: sub.resource 
       });
+     return certificate && certificate.status === 'active' ? sub : null;
+   }));
+   return active.filter(Boolean);
 
       res.json({
         success: true,
@@ -212,8 +213,11 @@ export const circleController= {
   try {
    const { id} = req.params;
 
-      // Convert string id to ObjectId
-   const objectId = new ObjectId(id);
+      // Validate id type and convert to ObjectId
+    if (!id || typeof id !== 'string') {
+     return res.status(400).json({ error: 'Invalid subscription ID' });
+    }
+   const objectId = new ObjectId(id as string);
 
       // Mark subscription as cancelled
     await db.payments.updateOne(

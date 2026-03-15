@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { ethers, AbiCoder } from 'ethers';
 import { db, PaymentCertificate, Wallet } from '../database/models';
 
 export interface PaymentDetails {
@@ -141,12 +141,10 @@ export class CircleGateway {
  resource: string
   ): Promise<PaymentCertification> {
     // Generate unique certificate ID
-   const certificateId = ethers.keccak256(
-      ethers.defaultAbiCoder.encode(
-        ['string', 'string', 'uint256', 'uint256'],
-        [userId, resource, amount, Date.now()]
-      )
-    );
+   const certificateId = AbiCoder.defaultAbiCoder().encode(
+     ['string', 'string', 'uint256', 'uint256'],
+     [userId, resource, amount, Date.now()]
+   );
 
    const expiresAt = new Date(Date.now() + 3600000); // 1 hour validity
 

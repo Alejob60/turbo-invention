@@ -24,31 +24,32 @@ export interface Payment {
  nonce?: number;
  createdAt: Date;
  settledAt?: Date;
+ cancelledAt?: Date;
 }
 
 export interface PaymentCertificate {
-  _id?: ObjectId;
-  certificateId: string;
-  userId: string;
-  amount: string;
+ _id?: ObjectId;
+ certificateId: string;
+ userId: string;
+ amount: string;
  resource: string;
-  status: 'active' | 'used' | 'expired';
-  createdAt: Date;
-  expiresAt: Date;
+ status: 'active' | 'used' | 'expired' | 'cancelled';
+ createdAt: Date;
+ expiresAt: Date;
 }
 
 export interface VM {
-  _id?: ObjectId;
-  vmId: string;
-  userId: string;
-  paymentCertificateId: string;
-  status: 'running' | 'deallocated' | 'stopped' | 'expired';
+ _id?: ObjectId;
+ vmId: string;
+ userId: string;
+ paymentCertificateId: string;
+ status: 'active' | 'running' | 'deallocated' | 'stopped' | 'expired';
  region: string;
-  vmSize: string;
-  accessEndpoint?: string;
-  createdAt: Date;
-  expiresAt: Date;
-  deallocatedAt?: Date;
+ vmSize: string;
+ accessEndpoint?: string;
+ createdAt: Date;
+ expiresAt: Date;
+ deallocatedAt?: Date;
 }
 
 export interface UsageMetric {
