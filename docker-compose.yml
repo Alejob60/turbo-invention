@@ -3,88 +3,77 @@ version: '3.8'
 services:
   # MongoDB Database
   mongodb:
-   image: mongo:7
- container_name: twin-ai-mongodb
- restart: unless-stopped
-  environment:
-     MONGO_INITDB_ROOT_USERNAME: admin
-     MONGO_INITDB_ROOT_PASSWORD: admin123
-     MONGO_INITDB_DATABASE: twin-ai-infra
-  ports:
-     - "27017:27017"
-   volumes:
-     - mongodb_data:/data/db
-  networks:
-     - twin-ai-network
+    image: mongo:7
+    container_name: twin-ai-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: twin-ai-infra
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - twin-ai-network
 
   # Redis Cache
- redis:
+  redis:
     image: redis:7-alpine
-  container_name: twin-ai-redis
-  restart: unless-stopped
-  command: redis-server --requirepass redis_prod_password_2026
-  ports:
+    container_name: twin-ai-redis
+    restart: unless-stopped
+    command: redis-server --requirepass redis_prod_password_2026
+    ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
-  networks:
+    networks:
       - twin-ai-network
 
   # Backend API
- backend:
+  backend:
     build:
-     context: ./backend
-    dockerfile: Dockerfile
-  container_name: twin-ai-backend
-  restart: unless-stopped
-  env_file:
-      - ./backend/.env
-  environment:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: twin-ai-backend
+    restart: unless-stopped
+    environment:
       - NODE_ENV=production
       - MONGODB_URI=mongodb://admin:admin123@mongodb:27017/twin-ai-infra?authSource=admin
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=redis_prod_password_2026
-  ports:
-      - "3001:3001"
-  depends_on:
+      - JWT_SECRET=${JWT_SECRET}
+      - MISYBOT_API_URL=${MISYBOT_API_URL}
+    depends_on:
       - mongodb
       - redis
-  networks:
+    ports:
+      - "3001:3001"
+    networks:
       - twin-ai-network
-   volumes:
-      - ./backend:/app
-      - /app/node_modules
 
-  # Frontend (Next.js)
- frontend:
+  # Frontend Web
+  frontend:
     build:
-     context: ./frontend
-    dockerfile: Dockerfile
-  container_name: twin-ai-frontend
-  restart: unless-stopped
-  env_file:
-      - ./frontend/.env
-  environment:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: twin-ai-frontend
+    restart: unless-stopped
+    environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001
       - NEXT_PUBLIC_MISYBOT_URL=https://realculture-backend-g3b9deb2fja4b8a2.canadacentral-01.azurewebsites.net
-  ports:
-      - "3000:3000"
-  depends_on:
+    depends_on:
       - backend
-  networks:
+    ports:
+      - "3000:3000"
+    networks:
       - twin-ai-network
-   volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
 
 networks:
- twin-ai-network:
+  twin-ai-network:
     driver: bridge
 
 volumes:
- mongodb_data:
-    driver: local
- redis_data:
-    driver: local
+  mongodb_data:
+  redis_data:

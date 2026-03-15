@@ -273,7 +273,7 @@ async function renewSubscriptionCertificate(payment: any): Promise<void> {
     }
   );
 
-  logger.info('Subscription certificate renewed', { payment.userId, newCert });
+  logger.info('Subscription certificate renewed', { userId: payment.userId, newCert });
 }
 
 /**

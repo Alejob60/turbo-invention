@@ -18,13 +18,15 @@ export interface Payment {
  amount: string;
  resource: string;
  subscriptionType?: 'one-time' | 'subscription';
- status: 'pending' | 'certified' | 'completed' | 'settled' | 'failed' | 'cancelled';
+ vmId?: string;
+ status: 'pending' | 'certified' | 'completed' | 'settled' | 'failed' | 'cancelled' | 'confirmed';
  certificateId?: string;
  signature?: string;
  nonce?: number;
  createdAt: Date;
  settledAt?: Date;
  cancelledAt?: Date;
+ confirmedAt?: Date;
 }
 
 export interface PaymentCertificate {
@@ -33,7 +35,7 @@ export interface PaymentCertificate {
  userId: string;
  amount: string;
  resource: string;
- status: 'active' | 'used' | 'expired' | 'cancelled';
+ status: 'active' | 'used' | 'expired' | 'cancelled' | 'pending';
  createdAt: Date;
  expiresAt: Date;
 }
